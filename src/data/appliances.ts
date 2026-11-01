@@ -1,4 +1,5 @@
 import type { ApplianceDef } from "@/lib/types";
+import { FRIDGE_DEF } from "@/data/applianceMeta";
 
 /**
  * ILLUSTRATIVE VALUES. These are ballpark figures for a hackathon demo, not sourced data.
@@ -8,6 +9,8 @@ import type { ApplianceDef } from "@/lib/types";
 const r = (low: number, typ: number, high: number) => ({ low, typ, high });
 
 export const APPLIANCES: ApplianceDef[] = [
+  // Fridge is first so it appears at the top of the add-appliance list.
+  FRIDGE_DEF,
   {
     id: "ceiling-fan",
     name: "Ceiling fan",
@@ -186,6 +189,9 @@ export const APPLIANCES: ApplianceDef[] = [
 export const APPLIANCE_BY_ID: Record<string, ApplianceDef> = Object.fromEntries(
   APPLIANCES.map((a) => [a.id, a]),
 );
+
+// Re-export FRIDGE_DEF so consumers can import from one place.
+export { FRIDGE_DEF } from "@/data/applianceMeta";
 
 /** Items shown in the "Did you forget...?" strip next to the Unaccounted segment. */
 export const FORGOTTEN_PROMPTS = APPLIANCES.filter((a) => a.forgottenPrompt).map((a) => ({

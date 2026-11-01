@@ -26,7 +26,6 @@ import {
   RotateCcw,
   Zap,
   TrendingDown,
-  Refrigerator,
 } from "lucide-react";
 
 export function Step4Plan() {
@@ -41,7 +40,6 @@ export function Step4Plan() {
     setFreeOnlyFilter,
     setStep,
     resetAll,
-    setDrawerOpen,
   } = useAppStore();
 
   const m = billMetrics(bill);
@@ -58,7 +56,7 @@ export function Step4Plan() {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-8 py-6 px-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
+      <div className="border-b border-zinc-800 pb-5">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-white">
             Your savings plan
@@ -67,17 +65,6 @@ export function Step4Plan() {
             Pick changes for your household to hit your target next billing period. All savings use the true marginal rate of ₹{m.marginalRate.toFixed(2)}/unit.
           </p>
         </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setDrawerOpen(true)}
-          className="border-zinc-700 text-zinc-300 hover:text-white self-start sm:self-auto"
-        >
-          <Refrigerator className="w-4 h-4 mr-1.5 text-blue-400" />
-          Fridge & upgrades drawer
-        </Button>
       </div>
 
       {/* Target Setting & Radial Chart Bento */}

@@ -28,7 +28,6 @@ export interface AppStore {
   // Navigation
   step: 1 | 2 | 3 | 4;
   lang: "en" | "ml";
-  isDrawerOpen: boolean;
 
   // Bill
   bill: Bill;
@@ -52,7 +51,6 @@ export interface AppStore {
   // Actions
   setStep: (step: 1 | 2 | 3 | 4) => void;
   setLang: (lang: "en" | "ml") => void;
-  setDrawerOpen: (open: boolean) => void;
   loadSampleBill: () => void;
   /** Hidden-demo only: loads SAMPLE_BILL + DEMO_ENTRIES. Not exposed in any UI. */
   loadDemo: () => void;
@@ -88,7 +86,6 @@ const DEFAULT_FRIDGE: FridgeInput = {
 export const useAppStore = create<AppStore>((set, get) => ({
   step: 1,
   lang: readLang(),
-  isDrawerOpen: false,
 
   bill: SAMPLE_BILL,
   isCustomBill: false,
@@ -110,8 +107,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
     writeLang(lang);
     set({ lang });
   },
-
-  setDrawerOpen: (isDrawerOpen) => set({ isDrawerOpen }),
 
   loadSampleBill: () => {
     set({
@@ -225,7 +220,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
       targetRupees: 200,
       selectedActionIds: [],
       freeOnlyFilter: false,
-      isDrawerOpen: false,
     });
   },
 }));
