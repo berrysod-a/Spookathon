@@ -100,3 +100,4 @@ export function UsageBlockChart({ data }: UsageBlockChartProps) {
     </div>
   );
 }
+

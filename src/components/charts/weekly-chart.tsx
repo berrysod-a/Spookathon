@@ -77,3 +77,4 @@ export function WeeklyChart({ profile }: WeeklyChartProps) {
     </div>
   );
 }
+
