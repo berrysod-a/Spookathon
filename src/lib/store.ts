@@ -1,8 +1,28 @@
 import { create } from "zustand";
 import { SAMPLE_BILL } from "@/data/sampleBill";
-import { DEMO_FRIDGE, DEMO_SELECTIONS } from "@/data/demoHousehold";
+import { DEMO_ENTRIES } from "@/data/demoEntries";
 import { validateBill } from "./calc";
+import type { ApplianceEntry } from "./schedule";
 import type { ApplianceSelection, Bill, FridgeInput, ValidationIssue } from "./types";
+
+// ── lang persistence helpers (safe in SSR) ───────────────────────────────────
+const LANG_KEY = "wattPlanLang";
+function readLang(): "en" | "ml" {
+  if (typeof window === "undefined") return "en";
+  try {
+    const v = localStorage.getItem(LANG_KEY);
+    return v === "ml" ? "ml" : "en";
+  } catch {
+    return "en";
+  }
+}
+function writeLang(lang: "en" | "ml") {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LANG_KEY, lang);
+    document.documentElement.lang = lang === "ml" ? "ml" : "en";
+  } catch { /* ignore */ }
+}
 
 export interface AppStore {
   // Navigation
@@ -17,7 +37,10 @@ export interface AppStore {
   extractionLoading: boolean;
   extractionError: string | null;
 
-  // Appliances & Fridge
+  // v2: ApplianceEntry rows (replaces selections + fridge in Phase 2)
+  entries: ApplianceEntry[];
+
+  // v1 (kept while Step 3 migrates in Phase 2 — C8)
   selections: ApplianceSelection[];
   fridge: FridgeInput;
 
@@ -31,12 +54,20 @@ export interface AppStore {
   setLang: (lang: "en" | "ml") => void;
   setDrawerOpen: (open: boolean) => void;
   loadSampleBill: () => void;
-  loadDemoHousehold: () => void;
+  /** Hidden-demo only: loads SAMPLE_BILL + DEMO_ENTRIES. Not exposed in any UI. */
+  loadDemo: () => void;
   setBill: (bill: Bill) => void;
   setBillField: <K extends keyof Bill>(field: K, value: Bill[K]) => void;
   setExtractionLoading: (loading: boolean) => void;
   setExtractionError: (error: string | null) => void;
 
+  // v2 entry management (used by C3 demo loader; fully wired in C8)
+  setEntries: (entries: ApplianceEntry[]) => void;
+  addEntry: (entry: ApplianceEntry) => void;
+  removeEntry: (uid: string) => void;
+  updateEntry: (uid: string, patch: Partial<ApplianceEntry>) => void;
+
+  // v1 appliance helpers (kept for Step 3 until Phase 2)
   setApplianceSelection: (id: string, qty: number, hoursPerDay: number) => void;
   removeAppliance: (id: string) => void;
   updateFridge: (updates: Partial<FridgeInput>) => void;
@@ -56,7 +87,7 @@ const DEFAULT_FRIDGE: FridgeInput = {
 
 export const useAppStore = create<AppStore>((set, get) => ({
   step: 1,
-  lang: "en",
+  lang: readLang(),
   isDrawerOpen: false,
 
   bill: SAMPLE_BILL,
@@ -65,6 +96,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   extractionLoading: false,
   extractionError: null,
 
+  entries: [],
   selections: [],
   fridge: DEFAULT_FRIDGE,
 
@@ -73,7 +105,12 @@ export const useAppStore = create<AppStore>((set, get) => ({
   freeOnlyFilter: false,
 
   setStep: (step) => set({ step }),
-  setLang: (lang) => set({ lang }),
+
+  setLang: (lang) => {
+    writeLang(lang);
+    set({ lang });
+  },
+
   setDrawerOpen: (isDrawerOpen) => set({ isDrawerOpen }),
 
   loadSampleBill: () => {
@@ -86,10 +123,16 @@ export const useAppStore = create<AppStore>((set, get) => ({
     });
   },
 
-  loadDemoHousehold: () => {
+  /** C3: hidden demo. Sets bill + entries. Not accessible via any UI. */
+  loadDemo: () => {
     set({
-      selections: [...DEMO_SELECTIONS],
-      fridge: { ...DEMO_FRIDGE },
+      bill: SAMPLE_BILL,
+      isCustomBill: true,
+      validationIssues: validateBill(SAMPLE_BILL),
+      extractionError: null,
+      extractionLoading: false,
+      entries: [...DEMO_ENTRIES],
+      step: 1,
     });
   },
 
@@ -113,8 +156,25 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   setExtractionLoading: (extractionLoading) => set({ extractionLoading }),
-  setExtractionError: (extractionError) => set({ extractionError, extractionLoading: false }),
+  setExtractionError: (extractionError) =>
+    set({ extractionError, extractionLoading: false }),
 
+  // ── v2 entry management ──────────────────────────────────────────────────
+  setEntries: (entries) => set({ entries }),
+
+  addEntry: (entry) => set({ entries: [...get().entries, entry] }),
+
+  removeEntry: (uid) =>
+    set({ entries: get().entries.filter((e) => e.uid !== uid) }),
+
+  updateEntry: (uid, patch) =>
+    set({
+      entries: get().entries.map((e) =>
+        e.uid === uid ? { ...e, ...patch } : e,
+      ),
+    }),
+
+  // ── v1 helpers (Step 3 uses these until C8) ──────────────────────────────
   setApplianceSelection: (id, qty, hoursPerDay) => {
     const current = get().selections;
     const existingIndex = current.findIndex((s) => s.id === id);
@@ -139,7 +199,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
     set({ fridge: { ...get().fridge, ...updates } });
   },
 
-  setTargetRupees: (targetRupees) => set({ targetRupees: Math.max(0, targetRupees) }),
+  setTargetRupees: (targetRupees) =>
+    set({ targetRupees: Math.max(0, targetRupees) }),
 
   toggleAction: (actionId) => {
     const current = get().selectedActionIds;
@@ -158,6 +219,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       bill: SAMPLE_BILL,
       isCustomBill: false,
       validationIssues: validateBill(SAMPLE_BILL),
+      entries: [],
       selections: [],
       fridge: DEFAULT_FRIDGE,
       targetRupees: 200,

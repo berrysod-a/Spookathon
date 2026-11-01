@@ -306,3 +306,4 @@ export function Step2Decode() {
     </div>
   );
 }
+

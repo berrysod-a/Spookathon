@@ -39,3 +39,11 @@ A dark, confident, data-forward interface that matches the reference direction a
 
 ## Quality floor
 Mobile-first (design at 390 px first), visible keyboard focus, 4.5:1 text contrast, buttons say what they do ("Use sample bill", "Save my plan"), error text says what to fix, empty states invite an action.
+
+## Flow and confirm screen (v2)
+1. **One continuous page.** Steps stack vertically. Confirming a step reveals the next section below it and scrolls there smoothly (`scrollIntoView({ behavior: "smooth", block: "start" })`, instant when reduced motion is on). The user never scrolls up to continue.
+2. **Completed steps collapse** into a one-line summary strip (for example "Bill confirmed: 281 units, 1,473 rupees") with an Edit button. Editing an earlier step recalculates everything below it.
+3. A slim sticky progress indicator shows where the user is and lets them jump back; it is never required for moving forward.
+4. **Confirm screen.** Title "Check your bill details"; line "We read these from your photo. Tap any number to fix it."; every field is visibly editable (pencil icon, input styling). Only fields that fail a check turn red, each with one specific message. When all checks pass show a green "Everything adds up" state. One primary button: "Confirm and continue". Do not show a generic "verification needed" warning.
+5. **Upload area.** Primary "Take photo" button, secondary "Choose from gallery" link, and "Enter manually". Nothing else.
+6. Appliance rows: compact cards with quantity stepper, remove icon, a "Usage" disclosure for the time-block editor, and an "Efficiency" disclosure for star, age and nameplate inputs.

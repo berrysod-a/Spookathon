@@ -1,38 +1,39 @@
 ---
 name: appliance-estimation
-description: Use when estimating appliance or fridge consumption, building the appliance picker, the breakdown chart, the "not covered by your list" segment, the savings plan actions, or the fridge replace-or-keep calculator.
+description: Use when adding, editing, or removing appliances, estimating consumption, the breakdown chart, the "not covered by your list" segment, the per-appliance efficiency check (star, age, nameplate, label), or the savings plan actions.
 ---
 
-# Appliance Estimation
+# Appliance Estimation (v2)
 
 ## Goal
-Turn a short appliance list into honest, range-based estimates of where the bill's units likely went, and into actions with rupee savings.
+Turn the household's own appliance list into honest, range-based estimates of where the bill's units likely went, and into ranked savings actions.
 
 ## Use this skill when
-- Adding or editing appliances, defaults, or the fridge table.
-- Rendering the breakdown, the unaccounted segment, or forgotten-appliance prompts.
-- Building the savings plan or the replace-or-keep view.
+- Building the appliance manager (add, remove, edit quantity and hours, custom appliances).
+- Rendering the breakdown or the "not covered" segment.
+- Building the efficiency check or the savings plan.
 
 ## Do not use this skill when
-- Parsing or validating the bill itself (use `bill-math`).
+- Parsing the bill (use `bill-math`) or designing the time editor (use `usage-schedule`).
+
+## What changed from v1
+- There is no separate fridge calculator and no sample household. The fridge is an ordinary appliance (`FRIDGE_DEF`) with an optional efficiency panel.
+- Rows are `ApplianceEntry` objects (`src/lib/schedule.ts`), not `ApplianceSelection`. They have a unique `uid`, so duplicates and custom appliances work.
 
 ## Instructions
-1. Formula: units = qty x watts x duty x hours/day x days / 1000, evaluated at low, typical and high values. Implemented in `estimateAppliance`.
-2. Every figure shown to the user is a range with an "Estimate" badge. Confidence levels: `rough` (our table), `label` (user typed the BEE label kWh), `measured` (meter test or plug, stretch).
-3. Fridge: use `fridgeExtraItem` for the breakdown and `fridgeReplaceOrKeep` for the decision. Baseline from the label kWh if entered, otherwise the table x star factor; then the age factor. Age and star factors are assumptions and are labelled as assumptions in the UI.
-4. Gap logic is in `computeBreakdown`:
-   - Always draw the "Not covered by your list" segment (typical value, with its range).
-   - Highlight it as a finding only if `status === "finding"`.
-   - If `status === "over-listed"`, show how many units the list exceeds the bill by and ask the user to revisit the widest-range items (usually AC or geyser hours).
-   - If `status === "roughly-explained"`, say so; do not invent a mystery.
-5. Forgotten-appliance strip (water pump, second fridge or freezer, geyser, inverter or UPS): ticking one adds it to the list and the segment visibly shrinks.
-6. Savings plan: actions come from `buildActions`, ranked by rupees saved. Progress uses `planProgress`. Free actions are tagged so renters can filter to them.
-7. Replace-or-keep verdicts: show the fix-first ladder before any replacement advice. Replacing a working fridge rarely pays back on electricity alone; the UI must say what the payback actually is.
+1. Estimate with `estimateEntry` (period units, range) and `estimateEntryByBlock`. Feed rows to the existing gap logic with `computeBreakdown(bill, metrics, [], entriesToExtras(entries, metrics.days))`.
+2. Appliance manager: searchable picker from `APPLIANCES` plus the fridge; "Add custom appliance" asks for a name and running watts (typical value, optional range); remove with one tap and an undo toast; quantity stepper; usage editor per `usage-schedule`.
+3. Efficiency check (`efficiencyCheck`) is optional per appliance. Inputs: age, star rating (only for categories with BEE labels per `APPLIANCE_META`), nameplate watts, label kWh per year, and for fridges capacity and type. It shows: current vs modern-equivalent annual kWh, estimated yearly saving as a range, a newness label, payback if a price is entered, and a verdict.
+4. Confidence: `rough` (table), `label` (nameplate watts or label kWh typed), `measured` (stretch). Show the badge on every figure.
+5. Do not offer model-number lookup; there is no reliable data behind it. If time allows, a "Photograph the label" button may reuse the extraction route to read stars, wattage and annual kWh, shown in an editable form like the bill.
+6. Gap logic as before: always show the "Not covered by your list" segment; highlight it only when `status === "finding"`; handle `over-listed` and `roughly-explained` honestly.
+7. Show the fix-first ladder (seal, defrost and coils, ventilation, temperature) for fridges before any replacement verdict. Replacement rarely pays back on electricity alone; show the real payback.
+8. Actions come from `buildEntryActions` and `buildShiftActions`, ranked by rupees at the marginal rate; grid-only actions are labelled.
 
 ## Copy rules
 Allowed: "estimated", "likely", "typical", "not covered by your list", "worth checking".
-Not allowed: "detected", "found your", "identified", "wasting", "hidden load" stated as fact.
+Not allowed: "detected", "found your", "identified", "wasting" as fact.
 
 ## Constraints
-- Reference values in `src/data` are illustrative until verified. Do not remove the "illustrative" flag without adding a source.
-- Do not add a precise-looking single number where a range exists.
+- Reference values in `src/data` are illustrative until verified; keep the flag and add sources.
+- Never show a single precise-looking number where a range exists.

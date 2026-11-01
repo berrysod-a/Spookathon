@@ -34,6 +34,8 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "monospace"],
+        // Used when lang="ml" — falls back to system Malayalam fonts when Google Fonts is offline
+        malayalam: ['"Noto Sans Malayalam"', '"Noto Sans"', "sans-serif"],
       },
       borderRadius: {
         lg: "16px",
@@ -46,3 +48,4 @@ const config: Config = {
 };
 
 export default config;
+

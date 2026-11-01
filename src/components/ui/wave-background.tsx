@@ -146,3 +146,4 @@ export function Waves({
 
   return <canvas ref={canvasRef} className={`w-full h-full block ${className}`} />;
 }
+
