@@ -3,6 +3,7 @@
 import React from "react";
 import { ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
 import { formatINR } from "@/lib/calc";
+import { useT } from "@/i18n";
 
 interface GoalRadialChartProps {
   savedRupees: number;
@@ -15,6 +16,7 @@ export function GoalRadialChart({
   targetRupees,
   pct,
 }: GoalRadialChartProps) {
+  const t = useT();
   const percentage = Math.round(pct * 100);
   const data = [
     {
@@ -60,7 +62,7 @@ export function GoalRadialChart({
           {formatINR(savedRupees)} / {formatINR(targetRupees)}
         </span>
         <span className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">
-          {percentage >= 100 ? "Goal reached!" : "Of target"}
+          {percentage >= 100 ? t("goal.reached") : t("goal.ofTarget")}
         </span>
       </div>
     </div>

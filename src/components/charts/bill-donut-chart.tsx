@@ -3,6 +3,7 @@
 import React from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import { formatINR } from "@/lib/calc";
+import { useT } from "@/i18n";
 
 interface BillDonutProps {
   fixedCharge: number;
@@ -29,12 +30,14 @@ export function BillDonutChart({
   other,
   total,
 }: BillDonutProps) {
+  const t = useT();
+
   const data = [
-    { name: "Fixed charge (FC)", value: fixedCharge, color: COLORS[0], desc: "You pay even at 0 units" },
-    { name: "Energy charge (EC)", value: energyCharge, color: COLORS[1], desc: "Usage tariff" },
-    { name: "Surcharges (FS + FSM)", value: surcharges, color: COLORS[2], desc: "Fuel & power purchase recovery" },
-    { name: "Electricity duty (ED)", value: duty, color: COLORS[3], desc: "Government tax (10% of EC)" },
-    ...(other > 0 ? [{ name: "Other charges", value: other, color: COLORS[4], desc: "Miscellaneous fees" }] : []),
+    { name: t("s2.fc.title"), value: fixedCharge, color: COLORS[0], desc: t("s2.fc.desc") },
+    { name: t("s2.ec.title"), value: energyCharge, color: COLORS[1], desc: t("s2.ec.desc") },
+    { name: t("s2.fs.title"), value: surcharges, color: COLORS[2], desc: t("s2.fs.desc") },
+    { name: t("s2.ed.title"), value: duty, color: COLORS[3], desc: t("s2.ed.desc") },
+    ...(other > 0 ? [{ name: t("s2.other.title"), value: other, color: COLORS[4], desc: t("s2.other.desc") }] : []),
   ].filter((d) => d.value > 0);
 
   const fixedPct = Math.round((fixedCharge / Math.max(1, total)) * 100);
@@ -85,13 +88,13 @@ export function BillDonutChart({
         {/* Center label */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
           <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
-            Variable
+            {t("s2.ec.badge")}
           </span>
           <span className="text-2xl font-mono font-bold text-white">
             {variablePct}%
           </span>
           <span className="text-[10px] text-zinc-500">
-            {fixedPct}% fixed
+            {fixedPct}% {t("s2.fc.badge")}
           </span>
         </div>
       </div>
@@ -130,4 +133,3 @@ export function BillDonutChart({
     </div>
   );
 }
-

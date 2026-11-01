@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import type { Breakdown, BreakdownItem } from "@/lib/types";
+import type { Breakdown } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { formatINR, formatRangeINR, formatRangeUnits } from "@/lib/calc";
-import { AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
+import { formatINR, formatRangeINR } from "@/lib/calc";
+import { AlertTriangle } from "lucide-react";
+import { useT } from "@/i18n";
 
 interface BreakdownRangesProps {
   breakdown: Breakdown;
@@ -12,6 +13,7 @@ interface BreakdownRangesProps {
 }
 
 export function BreakdownRanges({ breakdown, billUnits }: BreakdownRangesProps) {
+  const t = useT();
   const maxUnits = Math.max(billUnits, breakdown.listed.high, 1);
 
   return (
@@ -40,10 +42,14 @@ export function BreakdownRanges({ breakdown, billUnits }: BreakdownRangesProps) 
                     </span>
                   )}
                   <Badge variant="outline" className="text-[10px] text-zinc-400 border-zinc-700">
-                    Estimate
+                    {t("common.estimate")}
                   </Badge>
                   <span className="text-[10px] text-zinc-500 font-mono capitalize">
-                    {item.confidence === "rough" ? "Rough estimate" : item.confidence === "label" ? "Label-based" : "Measured"}
+                    {item.confidence === "rough"
+                      ? t("eff.roughEst")
+                      : item.confidence === "label"
+                      ? t("eff.labelBased")
+                      : t("eff.measured")}
                   </span>
                 </div>
 
@@ -104,7 +110,7 @@ export function BreakdownRanges({ breakdown, billUnits }: BreakdownRangesProps) 
                   : "text-zinc-300"
               }`}
             >
-              Not covered by your list
+              {t("s3.unaccounted")}
             </span>
             <Badge
               variant={
@@ -117,10 +123,10 @@ export function BreakdownRanges({ breakdown, billUnits }: BreakdownRangesProps) 
               className="text-[10px]"
             >
               {breakdown.status === "finding"
-                ? "Likely gap"
+                ? t("s3.gap.likely")
                 : breakdown.status === "over-listed"
-                ? "Over-estimated"
-                : "Roughly explained"}
+                ? t("s3.gap.over")
+                : t("s3.gap.rough")}
             </Badge>
           </div>
 
@@ -140,39 +146,24 @@ export function BreakdownRanges({ breakdown, billUnits }: BreakdownRangesProps) 
             <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold text-amber-300">
-                Noticeable gap found between your list and the bill.
+                {t("s3.gap.title")}
               </p>
               <p className="text-amber-200/80 mt-0.5">
-                Even at the lowest estimate, about {Math.round(breakdown.unaccounted.low)} units remain unaccounted for. Check the forgotten items below (like water pump or inverter).
+                {t("s3.gap.desc", { n: Math.round(breakdown.unaccounted.low) })}
               </p>
             </div>
-          </div>
-        )}
-
-        {breakdown.status === "roughly-explained" && (
-          <div className="text-xs text-zinc-400 leading-relaxed flex items-start gap-2 pt-2 border-t border-zinc-800">
-            <CheckCircle className="w-4 h-4 text-lime-400 shrink-0 mt-0.5" />
-            <p>
-              Your appliance list roughly explains your billed consumption of {billUnits} units.
-            </p>
           </div>
         )}
 
         {breakdown.status === "over-listed" && (
-          <div className="text-xs text-red-300 leading-relaxed flex items-start gap-2 pt-2 border-t border-red-500/20">
+          <div className="text-xs text-red-200/90 leading-relaxed flex items-start gap-2 pt-2 border-t border-red-500/20">
             <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-red-200">
-                Your estimated usage exceeds your bill by about {Math.round(breakdown.overBy)} units.
-              </p>
-              <p className="text-red-300/80 mt-0.5">
-                Consider checking the appliances with the widest usage ranges (usually AC runtime or water heater hours).
-              </p>
-            </div>
+            <p className="text-red-200/80">
+              {t("s3.overlisted", { n: Math.round(breakdown.listed.typ - billUnits) })}
+            </p>
           </div>
         )}
       </div>
     </div>
   );
 }
-

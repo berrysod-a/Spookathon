@@ -93,6 +93,18 @@ export const en = {
   "s2.chart.title": "Fixed vs variable charge split",
   "s2.chart.sub": "Only variable charges shrink when you reduce electricity usage.",
   "s2.cards.title": "Item-by-item breakdown in plain words",
+  "s2.rates.title": "The three rates decoded",
+  "s2.rates.badge": "Key Insight",
+  "s2.rates.sub": "Why you cannot just divide total bill by units to calculate savings.",
+  "s2.rates.r1.title": "Energy rate alone",
+  "s2.rates.r1.tag": "Tariff slab only",
+  "s2.rates.r1.desc": "Base tariff rate. Ignores fuel surcharge, auto recovery, and government electricity duty.",
+  "s2.rates.r2.title": "All-in rate",
+  "s2.rates.r2.tag": "Total ÷ Units",
+  "s2.rates.r2.desc": "Includes fixed charges. Overstates savings because your fixed charge remains even at zero usage.",
+  "s2.rates.r3.title": "True cost of 1 extra unit",
+  "s2.rates.r3.tag": "SAVINGS RATE",
+  "s2.rates.r3.desc": "Every unit you save cuts exactly this much. Combines energy, fuel surcharge, auto recovery & duty.",
 
   // ── Step 3 – Appliance breakdown ─────────────────────────────────────────
   "s3.title": "Where the units likely went",
@@ -118,6 +130,11 @@ export const en = {
   "s3.peak.note": "Most of your estimated use is between 6 and 10 pm",
   "s3.tod.no": "Your usage level does not have peak pricing, so shifting will not change your bill. It still helps the grid at peak.",
   "s3.unaccounted": "Not covered by your list",
+  "s3.gap.title": "Noticeable gap between your list and the bill",
+  "s3.gap.desc": "Even at the lowest estimate, about {n} units remain unaccounted for. Check unlisted appliances.",
+  "s3.gap.rough": "Roughly explained",
+  "s3.gap.likely": "Likely gap",
+  "s3.gap.over": "Over-estimated",
   "s3.overlisted": "Your listed appliances exceed the bill by {n} units \u2014 revisit the widest-range items.",
   "s3.empty": "No appliances added yet. Add one to start estimating.",
 
@@ -139,6 +156,8 @@ export const en = {
   "s4.badge.units": "{n} units cut",
   "s4.save": "Save \u223c{amount}",
   "s4.units.cycle": "\u223c{n} units / cycle",
+  "goal.reached": "Goal reached!",
+  "goal.ofTarget": "Of target",
 
   // ── Validation messages ───────────────────────────────────────────────────
   "val.units.mismatch": "Units ({units}) should equal present reading minus previous reading ({diff}). Check the meter readings.",
